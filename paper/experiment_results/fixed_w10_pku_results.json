@@ -1,0 +1,25 @@
+{
+  "description": "Fixed-Window-10 baseline on PKU-SafeRLHF",
+  "timestamp": "2026-04-03T11:07:18.462836",
+  "config": {
+    "window_size": 10,
+    "threshold": 0.5,
+    "max_length": 128
+  },
+  "metrics": {
+    "accuracy": 0.8683333333333333,
+    "precision": 0.8170930865541643,
+    "recall": 0.9621794871794872,
+    "f1": 0.8837209302325582,
+    "fpr": 0.23333333333333334,
+    "fnr": 0.03782051282051282,
+    "tp": 1501,
+    "tn": 1104,
+    "fp": 336,
+    "fn": 59,
+    "avg_stopping_time": 53.33566666666667,
+    "savings": 58.3,
+    "window_size": 10,
+    "threshold": 0.5
+  }
+}

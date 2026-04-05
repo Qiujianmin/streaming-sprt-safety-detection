@@ -1,0 +1,211 @@
+{
+  "exp5_calibration_sensitivity": [
+    {
+      "target_ece": 0.0,
+      "actual_ece": 0.2138,
+      "f1": 0.15,
+      "fpr": 0.8531,
+      "fnr": 0.0071,
+      "accuracy": 0.2065
+    },
+    {
+      "target_ece": 0.05,
+      "actual_ece": 0.2152,
+      "f1": 0.1425,
+      "fpr": 0.9059,
+      "fnr": 0.0071,
+      "accuracy": 0.1575
+    },
+    {
+      "target_ece": 0.1,
+      "actual_ece": 0.2116,
+      "f1": 0.1407,
+      "fpr": 0.8983,
+      "fnr": 0.0284,
+      "accuracy": 0.163
+    },
+    {
+      "target_ece": 0.15,
+      "actual_ece": 0.2149,
+      "f1": 0.139,
+      "fpr": 0.8892,
+      "fnr": 0.0496,
+      "accuracy": 0.17
+    },
+    {
+      "target_ece": 0.2,
+      "actual_ece": 0.2155,
+      "f1": 0.1375,
+      "fpr": 0.8349,
+      "fnr": 0.1135,
+      "accuracy": 0.216
+    }
+  ],
+  "exp6_latency": {
+    "classifier_per_call_ms": 6.05,
+    "classifier_std_ms": 0.24,
+    "sprt_avg_calls": 11.3,
+    "sprt_total_classify_ms": 68.4,
+    "llm_ms_per_token": 50,
+    "full_text_total_ms": 6406.0,
+    "sprt_total_ms_estimate": 633.4,
+    "speedup_estimate": 10.11
+  },
+  "exp7_chunking": [
+    {
+      "k": 1,
+      "f1": 0.1834,
+      "fpr": 0.8162,
+      "fnr": 0.0233,
+      "accuracy": 0.252,
+      "avg_calls": 12.6,
+      "avg_stop": 16.6,
+      "token_savings": 0.87
+    },
+    {
+      "k": 3,
+      "f1": 0.1888,
+      "fpr": 0.7877,
+      "fnr": 0.0233,
+      "accuracy": 0.278,
+      "avg_calls": 5.6,
+      "avg_stop": 19.0,
+      "token_savings": 0.8519
+    },
+    {
+      "k": 5,
+      "f1": 0.1881,
+      "fpr": 0.7702,
+      "fnr": 0.0465,
+      "accuracy": 0.292,
+      "avg_calls": 3.8,
+      "avg_stop": 19.5,
+      "token_savings": 0.8475
+    },
+    {
+      "k": 10,
+      "f1": 0.1896,
+      "fpr": 0.7418,
+      "fnr": 0.0698,
+      "accuracy": 0.316,
+      "avg_calls": 2.5,
+      "avg_stop": 21.4,
+      "token_savings": 0.8328
+    }
+  ],
+  "exp8_error_rates": [
+    {
+      "alpha": 0.01,
+      "beta": 0.05,
+      "prior": 0.5,
+      "A_raw": 4.55,
+      "B_raw": -2.99,
+      "A_adjusted": 4.55,
+      "B_adjusted": -2.99,
+      "fpr": 0.0,
+      "fnr": 1.0,
+      "f1": 0.0,
+      "accuracy": 0.9295,
+      "avg_tokens": 122.1
+    },
+    {
+      "alpha": 0.01,
+      "beta": 0.05,
+      "prior": 0.01,
+      "A_raw": 4.55,
+      "B_raw": -2.99,
+      "A_adjusted": -0.04,
+      "B_adjusted": -7.58,
+      "fpr": 0.2071,
+      "fnr": 0.1135,
+      "f1": 0.384,
+      "accuracy": 0.7995,
+      "avg_tokens": 101.2
+    },
+    {
+      "alpha": 0.05,
+      "beta": 0.1,
+      "prior": 0.5,
+      "A_raw": 2.89,
+      "B_raw": -2.25,
+      "A_adjusted": 2.89,
+      "B_adjusted": -2.25,
+      "fpr": 0.0,
+      "fnr": 1.0,
+      "f1": 0.0,
+      "accuracy": 0.9295,
+      "avg_tokens": 73.6
+    },
+    {
+      "alpha": 0.05,
+      "beta": 0.1,
+      "prior": 0.01,
+      "A_raw": 2.89,
+      "B_raw": -2.25,
+      "A_adjusted": -1.7,
+      "B_adjusted": -6.85,
+      "fpr": 0.8531,
+      "fnr": 0.0071,
+      "f1": 0.15,
+      "accuracy": 0.2065,
+      "avg_tokens": 25.8
+    },
+    {
+      "alpha": 0.1,
+      "beta": 0.15,
+      "prior": 0.5,
+      "A_raw": 2.14,
+      "B_raw": -1.79,
+      "A_adjusted": 2.14,
+      "B_adjusted": -1.79,
+      "fpr": 0.0005,
+      "fnr": 0.9433,
+      "f1": 0.1067,
+      "accuracy": 0.933,
+      "avg_tokens": 40.9
+    },
+    {
+      "alpha": 0.1,
+      "beta": 0.15,
+      "prior": 0.01,
+      "A_raw": 2.14,
+      "B_raw": -1.79,
+      "A_adjusted": -2.46,
+      "B_adjusted": -6.39,
+      "fpr": 0.9903,
+      "fnr": 0.0,
+      "f1": 0.1328,
+      "accuracy": 0.0795,
+      "avg_tokens": 6.4
+    },
+    {
+      "alpha": 0.2,
+      "beta": 0.2,
+      "prior": 0.5,
+      "A_raw": 1.39,
+      "B_raw": -1.39,
+      "A_adjusted": 1.39,
+      "B_adjusted": -1.39,
+      "fpr": 0.0059,
+      "fnr": 0.8227,
+      "f1": 0.2825,
+      "accuracy": 0.9365,
+      "avg_tokens": 20.7
+    },
+    {
+      "alpha": 0.2,
+      "beta": 0.2,
+      "prior": 0.01,
+      "A_raw": 1.39,
+      "B_raw": -1.39,
+      "A_adjusted": -3.21,
+      "B_adjusted": -5.98,
+      "fpr": 0.9989,
+      "fnr": 0.0,
+      "f1": 0.1318,
+      "accuracy": 0.0715,
+      "avg_tokens": 5.1
+    }
+  ],
+  "exp5_8_timestamp": "2026-03-30T10:17:50.263292"
+}

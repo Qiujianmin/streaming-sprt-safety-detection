@@ -1,0 +1,175 @@
+{
+  "timestamp": "2026-03-23T09:02:07.741585",
+  "note": "Simulated data based on paper results and theoretical analysis",
+  "latency": {
+    "Full-text": {
+      "mean_ms": 0.7,
+      "std_ms": 0.034999999999999996,
+      "classifier_calls_per_sample": 1.0,
+      "avg_stopping_time": 128.0,
+      "method": "Full-text",
+      "speedup": 1.0
+    },
+    "SPRT(\u03c0=0.01)": {
+      "mean_ms": 12.51,
+      "std_ms": 1.2510000000000001,
+      "classifier_calls_per_sample": 27.8,
+      "avg_stopping_time": 27.8,
+      "method": "SPRT(\u03c0=0.01)",
+      "speedup": 0.055955235811350916
+    },
+    "SPRT-chunked(k=5)": {
+      "mean_ms": 2.5020000000000002,
+      "std_ms": 0.25020000000000003,
+      "classifier_calls_per_sample": 5.5600000000000005,
+      "avg_stopping_time": 27.8,
+      "method": "SPRT-chunked(k=5)",
+      "speedup": 0.27977617905675456
+    },
+    "SPRT-chunked(k=10)": {
+      "mean_ms": 1.2510000000000001,
+      "std_ms": 0.12510000000000002,
+      "classifier_calls_per_sample": 2.7800000000000002,
+      "avg_stopping_time": 27.8,
+      "method": "SPRT-chunked(k=10)",
+      "speedup": 0.5595523581135091
+    },
+    "Confidence(th=0.95)": {
+      "mean_ms": 5.625,
+      "std_ms": 0.5625,
+      "classifier_calls_per_sample": 12.5,
+      "avg_stopping_time": 12.5,
+      "method": "Confidence(th=0.95)",
+      "speedup": 0.12444444444444444
+    },
+    "Fixed-W10": {
+      "mean_ms": 2.3400000000000003,
+      "std_ms": 0.23400000000000004,
+      "classifier_calls_per_sample": 5.2,
+      "avg_stopping_time": 45.2,
+      "method": "Fixed-W10",
+      "speedup": 0.2991452991452991
+    }
+  },
+  "end_to_end_latency": {
+    "Full-text": {
+      "llm_generation_ms": 6400,
+      "classification_ms": 0.7,
+      "total_ms": 6400.7,
+      "speedup": 1.0
+    },
+    "SPRT": {
+      "llm_generation_ms": 1390.0,
+      "classification_ms": 12.51,
+      "total_ms": 1402.51,
+      "speedup": 4.563746426050438
+    },
+    "SPRT-chunked(k=5)": {
+      "llm_generation_ms": 1390.0,
+      "classification_ms": 2.52,
+      "total_ms": 1392.52,
+      "speedup": 4.596486944532215
+    }
+  },
+  "calibration_sensitivity": {
+    "0.00": {
+      "target_ece": 0.0,
+      "actual_ece": 0.039,
+      "f1": 0.35,
+      "fpr": 0.05,
+      "fnr": 0.152,
+      "accuracy": 0.91
+    },
+    "0.05": {
+      "target_ece": 0.05,
+      "actual_ece": 0.055,
+      "f1": 0.326,
+      "fpr": 0.051,
+      "fnr": 0.176,
+      "accuracy": 0.908
+    },
+    "0.10": {
+      "target_ece": 0.1,
+      "actual_ece": 0.102,
+      "f1": 0.29,
+      "fpr": 0.068,
+      "fnr": 0.221,
+      "accuracy": 0.885
+    },
+    "0.15": {
+      "target_ece": 0.15,
+      "actual_ece": 0.148,
+      "f1": 0.24,
+      "fpr": 0.092,
+      "fnr": 0.289,
+      "accuracy": 0.852
+    },
+    "0.20": {
+      "target_ece": 0.2,
+      "actual_ece": 0.195,
+      "f1": 0.19,
+      "fpr": 0.145,
+      "fnr": 0.356,
+      "accuracy": 0.798
+    }
+  },
+  "confidence_comparison": {
+    "Confidence(0.90)": {
+      "threshold_type": "Arbitrary",
+      "threshold": 0.9,
+      "f1": 0.28,
+      "fpr": 0.123,
+      "fnr": 0.185,
+      "avg_tokens": 8.2,
+      "speedup": 4.5
+    },
+    "Confidence(0.95)": {
+      "threshold_type": "Arbitrary",
+      "threshold": 0.95,
+      "f1": 0.31,
+      "fpr": 0.087,
+      "fnr": 0.212,
+      "avg_tokens": 12.5,
+      "speedup": 3.2
+    },
+    "SPRT(\u03b1=0.05, \u03b2=0.10)": {
+      "threshold_type": "Theory-based",
+      "threshold": "A=2.94, B=-2.25",
+      "f1": 0.33,
+      "fpr": 0.051,
+      "fnr": 0.176,
+      "avg_tokens": 27.8,
+      "speedup": 2.3
+    }
+  },
+  "flops_estimation": {
+    "Full-text": {
+      "seq_length": 128,
+      "calls": 1,
+      "gflops_per_call": 32.0,
+      "total_gflops": 32.0,
+      "relative_to_fulltext": 1.0
+    },
+    "SPRT": {
+      "seq_length": "avg 50",
+      "calls": 27.8,
+      "gflops_per_call": 12.5,
+      "total_gflops": 347.5,
+      "relative_to_fulltext": 10.859375
+    },
+    "SPRT-chunked(k=5)": {
+      "seq_length": "avg 50",
+      "calls": 5.6,
+      "gflops_per_call": 12.5,
+      "total_gflops": 70.0,
+      "relative_to_fulltext": 2.1875
+    },
+    "SPRT-chunked(k=10)": {
+      "seq_length": "avg 50",
+      "calls": 2.8,
+      "gflops_per_call": 12.5,
+      "total_gflops": 35.0,
+      "relative_to_fulltext": 1.09375
+    }
+  }
+}

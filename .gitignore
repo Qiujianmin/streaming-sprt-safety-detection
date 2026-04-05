@@ -1,0 +1,6 @@
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.pt
+.gitattributes
