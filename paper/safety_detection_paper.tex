@@ -12,6 +12,14 @@
 \usepackage{xcolor}
 \usepackage{makecell}
 
+% Simplify headers/footers: remove headers, keep only page number in footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
 \newcommand{\Hzero}{H_0}
 \newcommand{\Hone}{H_1}
 \newcommand{\E}{\mathbb{E}}
@@ -34,6 +42,11 @@
 
 \author{Jianmin Qiu}
 \email{230239771@seu.edu.cn}
+\affiliation{
+  \institution{Southeast University}
+  \city{Nanjing}
+  \country{China}
+}
 \author{Jinguang Han}
 \affiliation{
   \institution{Southeast University}
@@ -136,17 +149,17 @@ This paper makes the following contributions:
 
 Classifier-based methods use fine-tuned models for safety classification, including Llama Guard~\cite{inan2023}, GPT-4 Moderation API~\cite{openai2023system}, Perspective API~\cite{gingeras2024}, and BERT/RoBERTa-based approaches~\cite{gehman2020, hartvigsen2022} that achieve state-of-the-art performance on hate speech detection. All require full text and lack streaming capability. Our method enables early decisions during generation.
 
-Among LLM-based safety classifiers, Llama Guard 1/2/3~\cite{inan2023, grattafiori2024, dubey2024} are 7B--8B-parameter models that achieve high accuracy on nuanced safety judgment. Llama Guard 3 8B serves as our Stage~2 classifier. GPT-4 Moderation~\cite{openai2023system} provides multi-dimensional safety scores across 13 categories.
+Among LLM-based safety classifiers, Llama Guard 1/2/3~\cite{inan2023, grattafiori2024} are 7B--8B-parameter models that achieve high accuracy on nuanced safety judgment. Llama Guard 3 8B serves as our Stage~2 classifier. GPT-4 Moderation~\cite{openai2023system} provides multi-dimensional safety scores across 13 categories.
 
-Our heterogeneous cascade specifically leverages the complementary strengths of fast encoder-based classifiers (RoBERTa, ${\sim}$6ms) and precise generative safety models (Llama Guard, ${\sim}$100ms), using the former for streaming screening and the latter only when needed for confirmation.
+Our heterogeneous cascade specifically leverages the complementary strengths of fast encoder-based classifiers (RoBERTa, ${\sim}$7ms) and precise generative safety models (Llama Guard, ${\sim}$86ms), using the former for streaming screening and the latter only when needed for confirmation.
 
 \subsection{Sequential Analysis in Machine Learning}
 
-Classical SPRT~\cite{wald1945} provides the optimal sequential test for i.i.d.\ observations, minimizing expected sample size under error constraints. Non-i.i.d.\ extensions include sequential analysis for Markov processes~\cite{lai2001} and online learning~\cite{orabona2022}. Recent ML applications include online LLM text detection~\cite{chen2024} and early exit for neural networks~\cite{chen2023}. These address different problems and do not handle LLM safety specifically.
+Classical SPRT~\cite{wald1945} provides the optimal sequential test for i.i.d.\ observations, minimizing expected sample size under error constraints. Non-i.i.d.\ extensions include sequential analysis for Markov processes~\cite{lai2001} and online learning~\cite{orabona2022}. Recent ML applications include online LLM text detection~\cite{chen2024} and early exit for neural networks~\cite{haseenarahmath2023}. These address different problems and do not handle LLM safety specifically.
 
 \subsection{Early Exit and Streaming Inference}
 
-Early exit networks~\cite{chen2023, surace2023} exit at intermediate layers for computational savings. Streaming LLMs~\cite{wu2023} use efficient attention mechanisms. Neither addresses safety detection. Our work applies early exit principles to the safety domain with principled threshold selection.
+Early exit networks~\cite{haseenarahmath2023, surace2023} exit at intermediate layers for computational savings. Streaming LLMs~\cite{wu2023} use efficient attention mechanisms. Neither addresses safety detection. Our work applies early exit principles to the safety domain with principled threshold selection.
 
 \subsection{Cascade Classification}
 
@@ -154,7 +167,7 @@ Cascade classifiers~\cite{viola2001} chain multiple classifiers where early stag
 
 Traditional cascades use the same classifier at different thresholds or context levels, which limits the diversity of decision boundaries. In contrast, Cascade-Guard uses RoBERTa (125M-parameter encoder) for Stage~1 screening and Llama Guard (8B-parameter generative safety model) for Stage~2 confirmation. These models have fundamentally different architectures, training data, and inductive biases, producing independent error modes. This model diversity is the key mechanism that prevents the cascade from collapsing to a single threshold.
 
-Llama Guard is a natural candidate for Stage~2: it is specifically trained for safety classification across multiple harm categories and achieves state-of-the-art precision, but its ${\sim}$100ms inference cost makes it too expensive for per-token streaming. By invoking it only when Stage~1 flags a prefix, we amortize its cost over the entire streaming pipeline.
+Llama Guard is a natural candidate for Stage~2: it is specifically trained for safety classification across multiple harm categories and achieves state-of-the-art precision, but its ${\sim}$86ms inference cost makes it too expensive for per-token streaming. By invoking it only when Stage~1 flags a prefix, we amortize its cost over the entire streaming pipeline.
 
 %% ============================================================
 \section{Problem Formulation}
@@ -316,9 +329,9 @@ The fundamental limitation of any single-threshold method is the precision-recal
 
 The Cascade-Guard architecture attempts to resolve this tension through model diversity.
 
-Stage~1 (RoBERTa Screening): A fine-tuned RoBERTa-base (125M params, ${\sim}$6ms/call) monitors each prefix during streaming generation. Using Wald-derived thresholds with aggressive priors ($\pi \ll 0.5$), Stage~1 flags potentially unsafe content with near-zero miss rate but high FPR.
+Stage~1 (RoBERTa Screening): A fine-tuned RoBERTa-base (125M params, ${\sim}$7ms/call) monitors each prefix during streaming generation. Using Wald-derived thresholds with aggressive priors ($\pi \ll 0.5$), Stage~1 flags potentially unsafe content with near-zero miss rate but high FPR.
 
-Stage~2 (Llama Guard Confirmation): When Stage~1 flags a prefix, Llama Guard (8B params, ${\sim}$100ms/call) classifies the same prefix. Only if both models agree on UNSAFE does the cascade declare the content unsafe. Otherwise, generation continues.
+Stage~2 (Llama Guard Confirmation): When Stage~1 flags a prefix, Llama Guard (8B params, ${\sim}$86ms/call) classifies the same prefix. Only if both models agree on UNSAFE does the cascade declare the content unsafe. Otherwise, generation continues.
 
 \textbf{Decision rule.}
 \begin{equation}
@@ -334,7 +347,7 @@ where $f^{S1}_\theta$ and $g^{S2}_\phi$ are the Stage~1 (RoBERTa) and Stage~2 (L
 
 Why is this not equivalent to a single threshold? The two stages use fundamentally different models---RoBERTa is a 125M-parameter encoder trained on toxicity labels, while Llama Guard is an 8B-parameter generative model trained for safety judgment. Their outputs $f^{S1}_\theta(x)$ and $g^{S2}_\phi(x)$ are neither identical nor deterministically related. For a given input $x$, the condition $(p^{S1}_x \geq \tau_1) \wedge (\text{unsafe}^{S2}_x)$ cannot be expressed as $p^{S1}_x \geq \tau^*$ for any single threshold $\tau^*$, because $g^{S2}_\phi$ is an independent model with its own decision boundary. This is analogous to ensemble methods: the intersection of two independent classifiers' positive regions produces a decision boundary that neither classifier alone can achieve.
 
-Stage~2 operates on the same prefix where Stage~1 triggered, requiring no additional token generation. The overhead is one Llama Guard forward pass at the stopping point, costing ${\sim}$100ms. The token savings are identical to the Stage~1 screening, since generation stops at the same point.
+Stage~2 operates on the same prefix where Stage~1 triggered, requiring no additional token generation. The overhead is one Llama Guard forward pass at the stopping point, costing ${\sim}$86ms. The token savings are identical to the Stage~1 screening, since generation stops at the same point.
 
 The intuition for FPR reduction is straightforward: the RoBERTa screening catches nearly all toxic content (low FNR) but also flags many safe samples (high FPR). Llama Guard acts as a second opinion from a fundamentally different model---it catches the false alarms because its errors are uncorrelated with RoBERTa's. The probability that both models make a false positive error on the same input is much lower than either model alone.
 
@@ -416,7 +429,7 @@ We use RoBERTa-base~\cite{liu2019} (125M parameters) fine-tuned on the training 
 
 \subsubsection{Stage 2: Llama Guard}
 
-We use Llama Guard 3 8B~\cite{inan2023, dubey2024} as the Stage 2 classifier. Llama Guard is applied without fine-tuning across all datasets---it provides zero-shot safety classification. This is a key advantage: the Stage 2 model generalizes across domains without dataset-specific training.
+We use Llama Guard 3 8B~\cite{inan2023, grattafiori2024} as the Stage 2 classifier. Llama Guard is applied without fine-tuning across all datasets---it provides zero-shot safety classification. This is a key advantage: the Stage 2 model generalizes across domains without dataset-specific training.
 
 \subsubsection{Comparison Methods}
 
@@ -434,8 +447,8 @@ We use Llama Guard 3 8B~\cite{inan2023, dubey2024} as the Stage 2 classifier. Ll
 \begin{itemize}
     \item Minimum tokens: $t_{\min} = 5$, Maximum tokens: $T_{\max} = 128$
     \item Default error rates: $\alpha = 0.05$, $\beta = 0.10$, thresholds $A \approx 2.89$, $B \approx -2.25$
-    \item Stage 1 (RoBERTa): ${\sim}$6ms per call on NVIDIA RTX 4090
-    \item Stage 2 (Llama Guard 3 8B): ${\sim}$100ms per call on NVIDIA RTX 4090
+    \item Stage 1 (RoBERTa): ${\sim}$7ms per call on NVIDIA RTX 4090
+    \item Stage 2 (Llama Guard 3 8B): ${\sim}$86ms per call on NVIDIA RTX 4090
     \item GPU: NVIDIA GeForce RTX 4090
 \end{itemize}
 
@@ -491,7 +504,7 @@ First, Stage~2 overrules hurt cascade performance. On PKU-SafeRLHF, single-stage
 
 Second, all single-stage methods succeed on adversarial data. On Qwen3GuardTest (100\% toxic), fine-tuned RoBERTa achieves perfect detection (F1=1.0) regardless of threshold---both Wald-parameterized and confidence methods detect all unsafe content with 96.1\% token savings. The cascade is the only method that fails (F1=0.238), because Llama Guard overrules 86.5\% of correct Stage~1 unsafe decisions. Note that because Qwen3GuardTest contains no safe samples, FPR is trivially 0 for all methods and F1 equals Recall; the meaningful metric for this dataset is Recall (i.e., what fraction of adversarial content is detected).
 
-Third, the cascade preserves token savings. Since Stage~2 (Llama Guard) operates on the same prefix where Stage~1 (RoBERTa) triggered, the token savings are identical to the single-stage method. The overhead is one Llama Guard forward pass (${\sim}$100ms) only for flagged samples.
+Third, the cascade preserves token savings. Since Stage~2 (Llama Guard) operates on the same prefix where Stage~1 (RoBERTa) triggered, the token savings are identical to the single-stage method. The overhead is one Llama Guard forward pass (${\sim}$86ms) only for flagged samples.
 
 Finally, the number of Llama Guard calls serves as an efficiency metric. Full-text LG requires calling Llama Guard on every sample. Cascade-Guard only invokes Llama Guard when Stage~1 flags a prefix. On PKU-SafeRLHF with $\pi$=0.01, this is 734/3000 (24.5\%) samples; on Qwen3GuardTest with $\pi$=0.05, Stage~1 triggers on all 489 test samples (100\%), requiring LG for every sample.
 
@@ -524,10 +537,10 @@ On BeaverTails, the cascade achieves 56\% FPR reduction (0.385$\to$0.168) but F1
 \subsubsection{Prefix Failure Analysis: Why Llama Guard Overrules Correct Decisions}
 \label{sec:prefix_failures}
 
-To understand why the cascade underperforms, we extract cases where RoBERTa (Stage~1) correctly flagged a prefix as UNSAFE but Llama Guard (Stage~2) overruled it as SAFE---the ground truth is UNSAFE. We found 799 such failures across datasets. Table~\ref{tab:prefix_failures} shows representative examples.
+To understand why the cascade underperforms, we extract cases where RoBERTa (Stage~1) correctly flagged a prefix as UNSAFE but Llama Guard (Stage~2) overruled it as SAFE---the ground truth is UNSAFE. We found 799 such failures across all four datasets. Table~\ref{tab:prefix_failures} shows representative examples.
 
 \begin{table}[h]
-\caption{Prefix Failure Cases: RoBERTa correctly flags UNSAFE but Llama Guard overrules as SAFE. Truncated for readability; full texts in supplementary material.}
+\caption{Prefix Failure Cases: RoBERTa correctly flags UNSAFE but Llama Guard overrules as SAFE. Truncated for readability.}
 \label{tab:prefix_failures}
 \small
 \begin{tabular}{p{0.15cm}p{2.5cm}cccc}
@@ -951,11 +964,11 @@ For practical deployment, we recommend the following workflow. First, estimate t
 
     \item Performance is highly sensitive to $\pi$. We provide guidelines ($\pi \approx$ toxicity rate), but incorrect settings degrade performance significantly.
 
-    \item All experiments run the classifier on pre-existing text. True end-to-end evaluation with an LLM generation loop is needed to validate latency claims.
+    \item While we validated end-to-end latency with an integrated LLM generation loop on RTX 4090 (Section~\ref{sec:chunking}), the streaming detection was evaluated on pre-existing text datasets rather than during live LLM generation with feedback between detection and generation. The measured latency overhead (Table~\ref{tab:latency_measured}) confirms the analytical model is conservative, but live deployment may introduce additional overhead from context switching and batch scheduling.
 
     \item RoBERTa re-encodes the entire prefix at each step (no KV-cache). For long sequences, chunking is essential to maintain efficiency.
 
-    \item Llama Guard adds ${\sim}$100ms latency for flagged samples. When Stage~1 triggers frequently (high Stage~1 FPR), this overhead is substantial. The cascade is most efficient when the Stage~1 trigger rate is moderate (30--60\%).
+    \item Llama Guard adds ${\sim}$86ms latency for flagged samples. When Stage~1 triggers frequently (high Stage~1 FPR), this overhead is substantial. The cascade is most efficient when the Stage~1 trigger rate is moderate (30--60\%).
 
     \item The architecture requires loading both RoBERTa (125M params) and Llama Guard (8B params), necessitating sufficient GPU memory. On resource-constrained devices, a smaller Stage~2 model may be needed.
 
@@ -989,7 +1002,7 @@ Stage~1 uses a fine-tuned RoBERTa with Wald-formula-derived thresholds parameter
 
 We have been explicit that the single-stage Wald method is mathematically equivalent to confidence thresholding---a single classifier cannot escape the precision-recall trade-off regardless of threshold choice. The heterogeneous two-stage architecture produces genuinely different decision boundaries because RoBERTa and Llama Guard have different architectures (encoder vs.\ generative), training objectives, and inductive biases. However, experiments on four diverse safety benchmarks reveal a mixed picture. On balanced datasets (BeaverTails, PKU-SafeRLHF), the cascade achieves 50--56\% FPR reduction over single-stage Wald streaming, but F1 decreases because Llama Guard, applied on short prefixes, overrules many correct Stage~1 decisions. On Qwen3GuardTest (100\% adversarial), all single-stage methods achieve perfect detection (F1=1.0) with 96.1\% token savings, while the zero-shot cascade fails (F1=0.238). Prefix-aware fine-tuning substantially improves the cascade (F1=0.736, +209\%), but it still falls short of single-stage perfection. On low-toxicity datasets (CivilComments, 8\%), neither Wald streaming nor cascade is competitive---Llama Guard's base F1=0.138 creates an insurmountable ceiling.
 
-The architecture's main limitation is the requirement to load two models (125M + 8B parameters), though the latency cost of Stage~2 is amortized over non-flagged samples. More fundamentally, cascade effectiveness is bounded by Stage~2's prefix-level performance: when Llama Guard overrules correct Stage~1 decisions on short prefixes, the cascade hurts rather than helps. Prefix-aware fine-tuning of Stage~2 partially resolves this bottleneck (Section~\ref{sec:prefix_ft_results}), validating the cascade architecture while revealing remaining limitations. Future work includes: (1) adaptive Stage~1 thresholds that account for Stage~2's known error profile, (2) evaluating other Stage~2 candidates with stronger prefix-level performance, and (3) integrating the cascade into a live LLM generation loop for end-to-end latency evaluation.
+The architecture's main limitation is the requirement to load two models (125M + 8B parameters), though the latency cost of Stage~2 is amortized over non-flagged samples. More fundamentally, cascade effectiveness is bounded by Stage~2's prefix-level performance: when Llama Guard overrules correct Stage~1 decisions on short prefixes, the cascade hurts rather than helps. Prefix-aware fine-tuning of Stage~2 partially resolves this bottleneck (Section~\ref{sec:prefix_ft_results}), validating the cascade architecture while revealing remaining limitations. Future work includes: (1) adaptive Stage~1 thresholds that account for Stage~2's known error profile, (2) evaluating other Stage~2 candidates with stronger prefix-level performance, and (3) live deployment evaluation under production workloads with feedback between detection and generation.
 
 %% ============================================================
 %% References
@@ -1055,8 +1068,8 @@ Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, et al.
 \newblock \emph{arXiv preprint arXiv:1907.11692}, 2019.
 
 \bibitem{gingeras2024}
-Perspective API.
-\newblock Google Jigsaw.
+Google Jigsaw.
+\newblock Perspective API: Machine Learning for Content Moderation.
 \newblock \url{https://perspectiveapi.com/}, 2024.
 
 
@@ -1077,18 +1090,13 @@ Aaron Grattafiori, Abhimanyu Dubey, et al.
 \newblock The Llama 3 Herd of Models.
 \newblock \emph{arXiv preprint arXiv:2407.21783}, 2024.
 
-\bibitem{dubey2024}
-Abhimanyu Dubey, Aaron Grattafiori, et al.
-\newblock The Llama 3 Herd of Models.
-\newblock \emph{arXiv preprint arXiv:2407.21783}, 2024.
-
 
 \bibitem{chen2024}
 Xiaohui Chen and Yutong Wang.
 \newblock Online Detection of LLM-Generated Texts via Sequential Hypothesis Testing by Betting.
 \newblock \emph{arXiv preprint arXiv:2410.22318}, 2024.
 
-\bibitem{chen2023}
+\bibitem{haseenarahmath2023}
 HaseenaRahmath K.P. and Pratistha Srivastava.
 \newblock Early-Exit Deep Neural Network: A Comprehensive Survey.
 \newblock \emph{ACM Computing Surveys}, DOI:10.1145/3698767, 2024.
